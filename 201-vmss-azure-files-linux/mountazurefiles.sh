@@ -15,7 +15,7 @@ apt-get -y update
 # install cifs-utils and mount file share
 apt-get install cifs-utils
 mkdir -p $4
-mount -t cifs //$1.file.core.windows.net/$3 $4 -o vers=3.0,username=$1,password=$2,dir_mode=0755,file_mode=0664
+mount -t cifs //$1.file.core.windows.net/$3 $4 -o vers=3.0,username=$1,password=$2,dir_mode=0777,file_mode=0666
 
 # create a symlink from /mountpath/xxx to ~username/xxx
 linkpoint=`echo $4 | sed 's/.*\///'`
