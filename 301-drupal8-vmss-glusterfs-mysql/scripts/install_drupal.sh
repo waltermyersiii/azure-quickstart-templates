@@ -96,10 +96,10 @@ while getopts :d:u:p:g:v:s:n:P:k:z:S:h optname; do
 	p) # drupal admin password
 		DRUPAL_ADMIN_PASSWORD=${OPTARG}
 		;;
-  g) # gluster first node name
+	g) # gluster first node name
 		GLUSTER_FIRST_NODE_NAME=${OPTARG}
 		;;
-  v) # gluster file system volume name
+	v) # gluster file system volume name
 		GLUSTER_VOLUME_NAME=${OPTARG}
 		;;
 	s) # mysql server fqdn
