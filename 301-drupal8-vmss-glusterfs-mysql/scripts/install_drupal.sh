@@ -52,14 +52,14 @@ help()
 	echo "		-d drupal version"
 	echo "		-u drupal admin username "
 	echo "		-p drupal admin password"
-  echo "		-g gluster first node name"
-  echo "		-v gluster file system volume name"
+  	echo "		-g gluster first node name"
+  	echo "		-v gluster file system volume name"
 	echo "		-s Existing mysql server fqdn"
 	echo "		-n mysql root user name"
 	echo "		-P mysql root user password"
-  echo "		-k new drupal database name"
-  echo "		-z if Yes connect to newly created mysql server, else connect to existing mysql server"
-  echo "		-S FQDN of the newly created MySQL Server"
+  	echo "		-k new drupal database name"
+  	echo "		-z if Yes connect to newly created mysql server, else connect to existing mysql server"
+  	echo "		-S FQDN of the newly created MySQL Server"
 }
 
 log()
