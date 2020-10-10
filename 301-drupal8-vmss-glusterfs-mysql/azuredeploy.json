@@ -100,7 +100,7 @@
     },
     "existingMysqlUser": {
       "type": "string",
-      "defaultValue": "admin",
+      "defaultValue": "drupaladmin",
       "metadata": {
         "description": "mysql username. When creating New MySQL server using mysql replication template this will be admin."
       }
