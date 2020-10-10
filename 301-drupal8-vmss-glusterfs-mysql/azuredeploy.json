@@ -29,7 +29,7 @@
     "drupalAdminPassword": {
       "type": "securestring",
       "metadata": {
-        "description": "The Ubuntu version for the Drupal VM. This will pick a fully patched image of this given Ubuntu version. Allowed values are: 15.10, 14.04.4-LTS."
+        "description": "Admin Password for the Drupal Installation"
       }
     },
     "drupalVersion": {
