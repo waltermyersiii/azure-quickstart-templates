@@ -624,7 +624,7 @@
                     "fileUris": [
                       "[uri(parameters('_artifactsLocation'), concat('scripts/install_drupal.sh', parameters('_artifactsLocationSasToken')))]"
                     ],
-                    "commandToExecute": "[concat('sudo bash install_drupal.sh -d ',parameters('drupalVersion') ,' -u ',parameters('drupalAdminUser'),' -p ',parameters('drupalAdminPassword') ,' -g glus -v gfsvol -s ', parameters('existingMySqlFQDN'),' -n ', parameters('existingMysqlUser'),' -P drupaladmin -k ',parameters('drupalInstallationDatabaseName'),' -z ',parameters('createNewMySQLServer'),' -S ',parameters('newMySqlDnsLabelPrefix'), '.', variables('location'), '.cloudapp.azure.com')]"
+                    "commandToExecute": "[concat('sudo bash install_drupal.sh -d ',parameters('drupalVersion') ,' -u ',parameters('drupalAdminUser') ,' -p ',parameters('drupalAdminPassword') ,' -g glus -v gfsvol -s ', parameters('existingMySqlFQDN'),' -n ', parameters('existingMysqlUser'),' -P drupaladmin -k ',parameters('drupalInstallationDatabaseName'),' -z ',parameters('createNewMySQLServer'),' -S ',parameters('newMySqlDnsLabelPrefix'), '.', variables('location'), '.cloudapp.azure.com')]"
                   }
                 }
               },
