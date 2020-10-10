@@ -135,6 +135,7 @@ done
 if [ "$GLUSTER_FIRST_NODE_NAME" == "" ] || [ "$GLUSTER_VOLUME_NAME" == "" ] || [ "$MYSQL_PASSWORD" == "" ];
 then
     log "Script executed without required parameters"
+    echo "Parameters: $GLUSTER_FIRST_NODE_NAME, $GLUSTER_VOLUME_NAME, $MYSQL_PASSWORD"
     echo "You must provide all required parameters." >&2
     exit 3
 fi
