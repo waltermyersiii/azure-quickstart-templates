@@ -26,24 +26,23 @@
 # Variables - Initialize default values
 DRUPAL_VERSION="8.1.1"
 DRUPAL_ADMIN_USER="admin"
-DRUPAL_ADMIN_PASSWORD=""
+DRUPAL_ADMIN_PASSWORD="tst909@@10"
 IS_FIRST_MEMBER=false
 
-GLUSTER_FIRST_NODE_NAME=""
-GLUSTER_VOLUME_NAME=""
-
-MYSQL_FQDN=""
-EXISTING_MYSQL_FQDN=""
+MYSQL_FQDN="drupalmysqlprimary905.mysql.database.azure.com"
+EXISTING_MYSQL_FQDN="drupalmysqlprimary905.mysql.database.azure.com"
 NEW_MYSQL_FQDN=""
 
 MYSQL_USER="admin"
 EXISTING_MYSQL_USER="admin"
 NEW_MYSQL_USER="admin"
 
-MYSQL_PASSWORD=""
+MYSQL_PASSWORD="tst909@@10"
 MYSQL_NEW_DB_NAME="drupaldb"
 
 CREATE_NEW_MYSQL_SERVER="no"
+#AZURE_FILES_MOUNT=""
+
 
 help()
 {
@@ -52,14 +51,14 @@ help()
 	echo "		-d drupal version"
 	echo "		-u drupal admin username "
 	echo "		-p drupal admin password"
-  	echo "		-g gluster first node name"
-  	echo "		-v gluster file system volume name"
 	echo "		-s Existing mysql server fqdn"
 	echo "		-n mysql root user name"
 	echo "		-P mysql root user password"
   	echo "		-k new drupal database name"
   	echo "		-z if Yes connect to newly created mysql server, else connect to existing mysql server"
   	echo "		-S FQDN of the newly created MySQL Server"
+	#echo "      -R AzureFiles Mountpoint" 
+
 }
 
 log()
@@ -79,7 +78,7 @@ fi
 
 
 # Parse script parameters
-while getopts :d:u:p:g:v:s:n:P:k:z:S:h optname; do
+while getopts :d:u:p:s:n:P:k:z:S:h optname; do
 
 	# Log input parameters (except the admin password) to facilitate troubleshooting
 	if [ ! "$optname" == "p" ] && [ ! "$optname" == "P" ]; then
@@ -95,12 +94,6 @@ while getopts :d:u:p:g:v:s:n:P:k:z:S:h optname; do
 		;;
 	p) # drupal admin password
 		DRUPAL_ADMIN_PASSWORD=${OPTARG}
-		;;
-	g) # gluster first node name
-		GLUSTER_FIRST_NODE_NAME=${OPTARG}
-		;;
-	v) # gluster file system volume name
-		GLUSTER_VOLUME_NAME=${OPTARG}
 		;;
 	s) # mysql server fqdn
 		EXISTING_MYSQL_FQDN=${OPTARG}
@@ -131,11 +124,13 @@ while getopts :d:u:p:g:v:s:n:P:k:z:S:h optname; do
   esac
 done
 
+echo "Parameters: $DRUPAL_ADMIN_USER, $MYSQL_USER, $MYSQL_PASSWORD, $MYSQL_FQDN, $MYSQL_NEW_DB_NAME, $DRUPAL_ADMIN_PASSWORD, $DRUPAL_ADMIN_USER, $EXISTING_MYSQL_FQDN"
+
 # Validate parameters
-if [ "$GLUSTER_FIRST_NODE_NAME" == "" ] || [ "$GLUSTER_VOLUME_NAME" == "" ] || [ "$MYSQL_PASSWORD" == "" ];
+if [ "$MYSQL_PASSWORD" == "" ];
 then
     log "Script executed without required parameters"
-    echo "Parameters: $DRUPAL_ADMIN_USER, DRUPAL_ADMIN_USER, $GLUSTER_FIRST_NODE_NAME, $GLUSTER_VOLUME_NAME, $MYSQL_PASSWORD"
+    echo "Parameters: $DRUPAL_ADMIN_USER, DRUPAL_ADMIN_USER, $MYSQL_PASSWORD"
     echo "You must provide all required parameters." >&2
     exit 3
 fi
@@ -152,23 +147,32 @@ fi
 install_required_packages()
 {
   # Install required packages
+  #echo "Installing AzureCLI"
+  #curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
   echo "installing required packages"
-  add-apt-repository ppa:gluster/glusterfs-3.7 -y
-  until apt-get -y update && apt-get -y install apache2 php5 php5-gd php5-mysql glusterfs-client mysql-client git
+  until apt-get -y update &&  apt-get -y install apache2 php7.0 php7.0-gd php7.0-mysql php7.0-mbstring php7.0-dom zip unzip libapache2-mod-php php7.0-zip mysql-client git
   do
-  echo "installing required packages....."
+  echo "installing required packages--inloop....."
   sleep 2
   done
 
 
-  # Install Drush
-  php -r "readfile('http://files.drush.org/drush.phar');" > drush
-  chmod +x drush
-  mv drush /usr/local/bin
-
   # Install Composer
-  curl -sS https://getcomposer.org/installer | php
-  mv composer.phar /usr/local/bin/composer
+   curl -sS https://getcomposer.org/installer | php
+   mv composer.phar /usr/local/bin/composer
+   ln -s /usr/local/bin/composer /usr/bin/composer
+   echo {  } > composer.json
+   echo {  } > /usr/local/bin/composer.json
+
+  # Install Drush
+  #Testting o see if drush can be installed with the drupal install, hence these below 3 lines can be removed
+ git clone https://github.com/drush-ops/drush.git /usr/local/src/drush
+ cd /usr/local/src/drush
+ git checkout 8.4.5  #or whatever version you want.
+ ln -s /usr/local/src/drush/drush /usr/bin/drush
+ composer install
+
 }
 
 configure_prequisites()
@@ -189,10 +193,36 @@ configure_prequisites()
  service apache2 restart
 
  # create gluster mount point
- mkdir -p /data
+# mkdir -p /data
 
  # mount gluster files system
- mount -t glusterfs $GLUSTER_FIRST_NODE_NAME:/$GLUSTER_VOLUME_NAME /data
+# mount -t glusterfs $GLUSTER_FIRST_NODE_NAME:/$GLUSTER_VOLUME_NAME /data
+# Add Azure file sharing mouting process. I would recommend doing this outside of drupal install script during VMSS scaleset creation.
+
+#sudo apt update
+#sudo apt install cifs-utils
+
+#httpEndpoint=$(az storage account show \
+#    --resource-group $resourceGroupName \
+#    --name $storageAccountName \
+#    --query "primaryEndpoints.file" | tr -d '"')
+
+#smbPath=$(echo $httpEndpoint | cut -c7-$(expr length $httpEndpoint))
+#fileHost=$(echo $smbPath | tr -d "/")
+#Blow testing connection to the storage account 
+#nc -zvw3 $fileHost 445
+
+#smbPath=$(echo $httpEndpoint | cut -c7-$(expr length $httpEndpoint))$fileShareName
+
+#mntPath="/data"
+
+#storageAccountKey=$(az storage account keys list \
+#    --resource-group $resourceGroupName \
+ #   --account-name $storageAccountName \
+ #   --query "[0].value" | tr -d '"')
+
+#sudo mount -t cifs -o dir_mode=0777,file_mode=0777 $smbPath $mntPath -o vers=3.0,username=$storageAccountName,password=$storageAccountKey,serverino
+
 
  # Check if this is the first drupal node based on existance of files directory and lockfile, and set IS_FIRST_MEMBER
  # The first member node will be the only one which will install the drupal site using drush site-install.
@@ -205,7 +235,7 @@ if [ ! -d /data/files ] && [ ! -f /data/flock.lock ]; then
   echo "lock created: Now acting as first drupal node"
 fi
 
- # if first drupal node then create /data/files directory on glusterfs
+ # if first drupal node then create /data/files directory on Azure Files
  if [ "$IS_FIRST_MEMBER" = true ]; then
       mkdir -p /data/files
 	  echo "creating files folder on shared mount.."
@@ -252,10 +282,10 @@ install_drupal()
  echo "Created Sym links..."
 
  if [ "$IS_FIRST_MEMBER" = true ];  then
-   chmod -R 777 /var/www/html/drupal/sites/default/files/
-   chmod -R 755 /var/www/html/drupal/sites/default/
-   chmod 777 /var/www/html/drupal/sites/default/settings.php
-   chmod 777 /var/www/html/drupal/sites/default/services.yml
+  chmod -R 777 /var/www/html/drupal/sites/default/files/
+  chmod -R 755 /var/www/html/drupal/sites/default/
+  chmod 777 /var/www/html/drupal/sites/default/settings.php
+  chmod 777 /var/www/html/drupal/sites/default/services.yml
    echo "modified permisssions on files for installation..."
 fi
 
@@ -269,7 +299,7 @@ install_drupal_site()
 
  echo "before execution of drush site-install command" >> /data/flock.lock
 
-drush site-install --site-name="drupal-site" --db-url=mysql://$MYSQL_USER:$MYSQL_PASSWORD@$MYSQL_FQDN/$MYSQL_NEW_DB_NAME --account-name=$DRUPAL_ADMIN_USER --account-pass=$DRUPAL_ADMIN_PASSWORD -y
+ drush site-install --site-name="drupal-site" --db-url=mysql://$MYSQL_USER:$MYSQL_PASSWORD@$MYSQL_FQDN/$MYSQL_NEW_DB_NAME --account-name=$DRUPAL_ADMIN_USER --account-pass=$DRUPAL_ADMIN_PASSWORD -y
 
 wget localhost
 
@@ -284,8 +314,7 @@ secure_files()
  chmod 444 /var/www/html/drupal/sites/default/services.yml
 
  # Set lock file to readonly.
- chmod 444 /data/flock.loc
-
+ chmod 444 /data/flock.lock
  echo "Files secured"
 }
 
