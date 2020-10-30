@@ -172,7 +172,7 @@ install_required_packages()
  cd /usr/local/src/drush
  git checkout 8.4.5  #or whatever version you want.
  ln -s /usr/local/src/drush/drush /usr/bin/drush
- php composer.phar install
+ composer install
 
 }
 
@@ -252,7 +252,7 @@ install_drupal()
  # create drupal project will given drupal version
  composer create-project drupal/drupal drupal8-site $DRUPAL_VERSION --keep-vcs
  cd drupal8-site/
- php composer.phar install
+ composer install
  cd ..
 
  # Move the drupal directory under html folder
